@@ -1,0 +1,103 @@
+client server architecture
+
+user => sends request to => Server =>DNS and gives Ip address =>
+=> database => server=>then gives the response to user
+
+After signing up when we Login
+Our server gives us JWT token
+an id is created and a big string(JWT token) is formed and as response the user is getting it 
+
+token's store ids
+jwt token gets stores in frontend and it's wrapped in cookies
+
+/user(token) => every request sent to bakend with token to validate token
+our api will run only when the token gets validate 
+token has some expiry(eg: 1 day ,10 hours, 5 days etc)
+
+// because of JWT_SECRET no one can access profiles or any data of user even when they type the exact profile route
+
+hamne signup  kiya
+then jab login kiya toh pehle email check hoga ki banda exist krta h ya nahi check karenge
+agar email exit nahi krta toh throw karega agar varna password check karega
+hamne password encrypt kar rakh h ie long string toh pehle usko bycrpt karenge
+taki ham entered and stored password match kar paye
+
+for token expiry you can give 1m - minute 3h - hour 7d- days
+
+jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:'7d'})
+app.get('/feed', async (req, res) => {       //taki sab users other users ki profile dkeh paye
+
+    try {
+        const usersData = await User.find()
+        res.send(usersData)
+    } catch (err) {
+        res.status(400).send('Something went wrong')
+    }
+})
+app.get('/useremail', async (req, res) => {
+    const userEmail = req.body.email
+    try {
+        const userData = await User.find({ email: userEmail })
+        // agar same email ke 2 user h toh find saare user ka data dega with that email
+        // findOne uss email mein jiska sabse pehla match kar jayega email sirf uska email dega
+        if (users.length > 0) {
+            res.send(userData)
+        }
+        res.status(404).send("User not found")
+
+    } catch (err) {
+        res.status(400).send('Something went wrong')
+    }
+
+})
+app.delete('/user', async (req, res) => {
+    const deleteUserId = req.body._id
+    try {
+        const user = await User.findByIdAndDelete(deleteUserId)
+        res.send('User Deleted Successfully')
+
+    } catch (err) {
+        res.status(400).send("Something went wrong")
+    }
+})
+app.patch('/user', async (req, res) => {
+    const data = req.body
+    try {
+        const updatedData = await User.findByIdAndUpdate(data._id, data, { returnDocument: 'after' }, { runValidators: true })
+        if (updatedData) {
+            res.send({
+                message: "Data Updated Successfully",
+                data: updatedData
+            })
+        }
+
+    } catch (err) {
+        res.status(400).send("Something went wrong")
+        console.log(err)
+    }
+})
+
+API kaise lihte h
+const userAuth=require("../middleware/auth")
+const userAuth
+userRouter.get("/user/requests",userAuth,async(req,res)=>{
+try{
+    const loggedInUser=req.user
+    const connectionRequests=await Connection.RequestModel.find({
+        toUserId:loggedInUser._id
+    })
+    res.json({
+        message:"Data fetched Successfully",
+        data:ConnectionRequests
+    })
+}catch(err){
+    res.status(400).send("Error:"+err.message)
+}
+
+})
+
+//user should be able to send any requesst except 
+// to his own self
+// interested people
+// Connections
+
