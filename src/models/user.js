@@ -4,7 +4,8 @@ const validator = require('validator')
 const userSchema = new mongoose.Schema( {
     firstName:{
         type:String,
-        required:'true'
+        required:true,
+        index:true      // helps to find users easily MongoDB creates a special fast lookup structure internally.
     },
     lastName:{
         type:String
@@ -12,7 +13,7 @@ const userSchema = new mongoose.Schema( {
     email:{
         type:String,
         required:true,
-        unique:true,         // email should be unique
+        unique:true,         // email should be unique automatically indexing applied
         lowercase:true,      // ye apne aap email ko lowecase mein save kar lega
         validate(value){
             if(!validator.isEmail(value)){
